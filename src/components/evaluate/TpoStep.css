@@ -1,0 +1,48 @@
+.tpo-step { max-width: 680px; margin: 0 auto; text-align: center; }
+
+.tpo-grid {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  text-align: left;
+}
+@media (max-width: 640px) {
+  .tpo-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.tpo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-card);
+  background: #fff;
+  cursor: pointer;
+  transition: .15s;
+  text-align: left;
+  font-family: inherit;
+}
+.tpo-card:hover { border-color: var(--accent); }
+.tpo-card.is-selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+.tpo-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.tpo-card.is-selected .tpo-card__icon {
+  background: var(--primary);
+  color: #fff;
+}
+.tpo-card__label { font-weight: 700; font-size: 15px; }
+.tpo-card__desc { font-size: 12.5px; color: var(--text-muted); line-height: 1.5; }
