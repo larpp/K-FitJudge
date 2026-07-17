@@ -1,0 +1,39 @@
+/* ============================================================
+   K-FitJudge Design Tokens
+   색: 슬랙 · 컬러풀 / 버튼: 라운드 / 폰트: Inter / 아이콘: 솔리드
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
+
+:root {
+  /* --- 색 조합: 슬랙 · 컬러풀 --- */
+  --primary: #4A154B;      /* Aubergine */
+  --accent: #1264A3;       /* 액션 블루 */
+  --green: #2EB67D;
+  --yellow: #ECB22E;
+  --text: #1D1C1D;
+  --bg: #FFFFFF;
+  --border: #E8E8E8;
+
+  /* 파생 톤 (배경/보더/hover 등에 사용) */
+  --primary-soft: #F3E9F4;
+  --accent-soft: #E8F1FA;
+  --green-soft: #E4F8EF;
+  --yellow-soft: #FDF3DF;
+  --text-muted: #6B6A6C;
+  --surface: #FAF9FA;
+  --danger: #E01E5A;
+
+  /* --- 버튼 / 카드 라운드 --- */
+  --radius-btn: 10px;
+  --radius-card: 16px;
+  --radius-sm: 8px;
+  --radius-pill: 999px;
+
+  /* --- 타이포 --- */
+  --font-base: 'Inter', sans-serif;
+
+  /* --- 간격/레이아웃 --- */
+  --container-max: 1120px;
+  --shadow-card: 0 2px 8px rgba(29, 28, 29, 0.06);
+  --shadow-pop: 0 12px 32px rgba(74, 21, 75, 0.16);
+}

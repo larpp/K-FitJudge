@@ -1,0 +1,103 @@
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.site-header__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+}
+.site-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 19px;
+  color: var(--primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.site-header__brand .icon { color: var(--accent); }
+
+.site-header__nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.site-header__nav a {
+  font-weight: 500;
+  font-size: 14.5px;
+  color: var(--text);
+  padding: 6px 2px;
+  border-bottom: 2px solid transparent;
+}
+.site-header__nav a:hover { color: var(--primary); }
+.site-header__nav a.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border);
+  background: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  transition: .15s;
+}
+.lang-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+.site-header__menu-btn {
+  display: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text);
+  padding: 6px;
+}
+
+.site-header__mobile {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 0 18px;
+  border-top: 1px solid var(--border);
+}
+.site-header__mobile a {
+  padding: 10px 4px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+}
+.site-header__mobile a:hover { background: var(--surface); }
+
+@media (max-width: 860px) {
+  .site-header__nav { display: none; }
+  .site-header__menu-btn { display: inline-flex; }
+  .site-header__mobile.is-open { display: flex; }
+}
+
+@media (max-width: 480px) {
+  .site-header__bar { height: 60px; }
+  .site-header__brand { font-size: 16px; gap: 6px; }
+  .site-header__brand .icon { width: 20px; height: 20px; }
+  .site-header__actions { gap: 6px; }
+  .lang-toggle { padding: 7px 9px; font-size: 12px; }
+  .site-header__actions .btn-sm { padding: 9px; gap: 0; }
+  .site-header__actions .btn-sm .icon { width: 16px; height: 16px; }
+  .site-header__label { display: none; }
+}
