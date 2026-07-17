@@ -8,11 +8,12 @@ import './AnalyzingStep.css';
 interface AnalyzingStepProps {
   tpoLabel: string;
   onReset: () => void;
+  onViewResult: () => void;
 }
 
 const STEP_DELAY_MS = 900;
 
-export default function AnalyzingStep({ tpoLabel, onReset }: AnalyzingStepProps) {
+export default function AnalyzingStep({ tpoLabel, onReset, onViewResult }: AnalyzingStepProps) {
   const { t } = useI18n();
   const steps = t.evaluate.analyzing.steps.map((s) => s.replace('{tpo}', tpoLabel));
   const [completedCount, setCompletedCount] = useState(0);
@@ -66,9 +67,12 @@ export default function AnalyzingStep({ tpoLabel, onReset }: AnalyzingStepProps)
 
       {done && (
         <div className="evaluate-step__actions">
-          <Button variant="outline" onClick={onReset}>
-            <Icon name="swap" size={16} />
+          <Button variant="ghost" onClick={onReset}>
             {t.evaluate.analyzing.resetButton}
+          </Button>
+          <Button size="lg" onClick={onViewResult}>
+            {t.evaluate.analyzing.viewResultButton}
+            <Icon name="chevronRight" size={18} />
           </Button>
         </div>
       )}
