@@ -40,8 +40,12 @@ export default function Header() {
         </nav>
 
         <div className="site-header__actions">
-          <button className="lang-toggle" onClick={toggleLocale} aria-label="Toggle language">
-            {locale === 'ko' ? '한국어' : 'English'}
+          <button
+            className="lang-toggle"
+            onClick={toggleLocale}
+            aria-label={locale === 'ko' ? 'Switch to English' : '한국어로 전환'}
+          >
+            {locale === 'ko' ? 'English' : '한국어'}
           </button>
           {user ? (
             <UserMenu />

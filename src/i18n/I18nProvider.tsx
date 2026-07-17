@@ -19,10 +19,10 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 const STORAGE_KEY = 'kfitjudge-locale';
 
 function getInitialLocale(): Locale {
-  if (typeof window === 'undefined') return 'ko';
+  if (typeof window === 'undefined') return 'en';
   const saved = window.localStorage.getItem(STORAGE_KEY);
   if (saved === 'ko' || saved === 'en') return saved;
-  return navigator.language?.startsWith('ko') ? 'ko' : 'en';
+  return 'en';
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
