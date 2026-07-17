@@ -1,0 +1,62 @@
+.user-menu {
+  position: relative;
+}
+.user-menu__trigger {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+}
+.user-menu__trigger::-webkit-details-marker { display: none; }
+
+.user-menu__avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.user-menu__panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 200px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-pop);
+  padding: 8px;
+  z-index: 50;
+}
+
+.user-menu__who {
+  padding: 10px 12px 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+}
+.user-menu__name { font-weight: 700; font-size: 14px; }
+.user-menu__email { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+.user-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+.user-menu__item:hover { background: var(--surface); }
+.user-menu__item .icon { color: var(--text-muted); }

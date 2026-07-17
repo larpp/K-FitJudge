@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import Icon from '../ui/Icon';
 import Button from '../ui/Button';
+import UserMenu from './UserMenu';
 import { useI18n } from '../../i18n/I18nProvider';
+import { useAuth } from '../../auth/AuthProvider';
 import './Header.css';
 
 export default function Header() {
   const { t, locale, toggleLocale } = useI18n();
+  const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navItems = [
@@ -40,12 +43,16 @@ export default function Header() {
           <button className="lang-toggle" onClick={toggleLocale} aria-label="Toggle language">
             {locale === 'ko' ? '한국어' : 'English'}
           </button>
-          <Link to="/login">
-            <Button size="sm" variant="outline" aria-label={t.common.login}>
-              <Icon name="user" size={16} />
-              <span className="site-header__label">{t.common.login}</span>
-            </Button>
-          </Link>
+          {user ? (
+            <UserMenu />
+          ) : (
+            <Link to="/login">
+              <Button size="sm" variant="outline" aria-label={t.common.login}>
+                <Icon name="user" size={16} />
+                <span className="site-header__label">{t.common.login}</span>
+              </Button>
+            </Link>
+          )}
           <button
             className="site-header__menu-btn"
             onClick={() => setMobileOpen((v) => !v)}
