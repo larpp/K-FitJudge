@@ -1,0 +1,12 @@
+.evaluate-step__subtitle {
+  margin-top: 8px;
+  color: var(--text-muted);
+}
+
+.evaluate-step__actions {
+  margin-top: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}

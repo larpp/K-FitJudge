@@ -75,6 +75,50 @@ const ko = {
     tagline: 'K-culture를 사랑하는 모두를 위한 AI 패션 평가 서비스',
     rights: '© 2026 K-FitJudge. All rights reserved.',
   },
+  evaluate: {
+    stepLabels: ['사진 업로드', 'TPO 선택', '스타일 의도', 'AI 평가'],
+    back: '이전',
+    upload: {
+      title: '평가받을 사진을 올려주세요',
+      subtitle: '전신이 잘 보이는 사진일수록 더 정확하게 평가할 수 있어요.',
+      dropTitle: '사진을 여기로 끌어다 놓거나 클릭해서 선택하세요',
+      dropHint: 'JPG, PNG · 최대 10MB',
+      or: '또는',
+      browseButton: '파일 선택하기',
+      sampleButton: '샘플 사진으로 체험하기',
+      changeButton: '다른 사진 선택',
+      selectedLabel: '사진이 준비됐어요',
+      sampleSelectedLabel: '샘플 사진으로 체험 중이에요',
+      nextButton: '다음: TPO 선택',
+    },
+    tpo: {
+      title: '어떤 상황의 옷차림인가요?',
+      subtitle: '같은 옷이어도 상황에 따라 채점 기준이 달라져요. 하나를 선택해주세요.',
+      nextButton: '다음: 스타일 의도',
+    },
+    intent: {
+      title: '이 스타일, 의도가 있나요?',
+      subtitle: '실험적인 룩을 선언하면 채점 기준이 조정돼서 억울하게 감점되지 않아요.',
+      classicTitle: '클래식',
+      classicDesc: '기본에 충실한 균형 잡힌 스타일이에요. 일반적인 기준으로 꼼꼼히 채점해요.',
+      experimentalTitle: '실험적 (아방가르드)',
+      experimentalDesc: '과감한 오버사이즈·믹스매치도 의도로 존중해요. 창의성을 기준에 반영해 채점해요.',
+      nextButton: '평가 시작하기',
+    },
+    analyzing: {
+      title: 'AI가 스타일을 분석하고 있어요',
+      subtitle: '보통 몇 초면 끝나요. 잠시만 기다려주세요.',
+      steps: [
+        '사진을 분석하고 있어요',
+        '색상 조합과 핏을 확인하고 있어요',
+        '{tpo} 상황에 맞게 채점하고 있어요',
+        '세부 피드백을 작성하고 있어요',
+      ],
+      doneTitle: '평가가 끝났어요!',
+      doneSubtitle: '결과 화면(점수·피드백·Before/After)은 다음 단계에서 이어집니다.',
+      resetButton: '처음부터 다시 해보기',
+    },
+  },
 };
 
 export default ko;

@@ -1,0 +1,48 @@
+.intent-step { max-width: 640px; margin: 0 auto; text-align: center; }
+
+.intent-grid {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  text-align: left;
+}
+@media (max-width: 600px) {
+  .intent-grid { grid-template-columns: 1fr; }
+}
+
+.intent-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 20px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-card);
+  background: #fff;
+  cursor: pointer;
+  transition: .15s;
+  text-align: left;
+  font-family: inherit;
+}
+.intent-card:hover { border-color: var(--accent); }
+.intent-card.is-selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+.intent-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.intent-card.is-selected .intent-card__icon {
+  background: var(--primary);
+  color: #fff;
+}
+.intent-card__title { font-weight: 800; font-size: 16px; }
+.intent-card__desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }

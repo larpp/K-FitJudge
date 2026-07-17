@@ -20,7 +20,10 @@ export type IconName =
   | 'bag'
   | 'heart'
   | 'palette'
-  | 'arrowRight';
+  | 'arrowRight'
+  | 'cap'
+  | 'ring'
+  | 'bolt';
 
 interface IconProps {
   name: IconName;
@@ -102,6 +105,24 @@ const paths: Record<IconName, ReactElement> = {
   arrowRight: (
     <path d="M4 11h13.2l-4.6-4.6L14 5l7 7-7 7-1.4-1.4 4.6-4.6H4v-2z" />
   ),
+  cap: (
+    <>
+      <polygon points="12,4 22,9 12,14 2,9" />
+      <path d="M7 10.5 12 12.5 17 10.5V15c0 1.8-2.4 3-5 3s-5-1.2-5-3v-4.5z" />
+      <circle cx="21" cy="9.5" r="1.1" />
+    </>
+  ),
+  ring: (
+    <>
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M7 15A5 5 0 1 0 17 15A5 5 0 1 0 7 15Z M9.2 15A2.8 2.8 0 1 1 14.8 15A2.8 2.8 0 1 1 9.2 15Z"
+      />
+      <polygon points="12,4 14.3,8 12,10.8 9.7,8" />
+    </>
+  ),
+  bolt: <polygon points="13,2 4,14 11,14 9,22 20,9 13,9" />,
 };
 
 export default function Icon({ name, className = '', size }: IconProps) {

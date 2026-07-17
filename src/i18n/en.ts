@@ -77,6 +77,50 @@ const en: typeof ko = {
     tagline: 'AI fashion evaluation for everyone who loves K-culture',
     rights: '© 2026 K-FitJudge. All rights reserved.',
   },
+  evaluate: {
+    stepLabels: ['Upload Photo', 'Pick TPO', 'Style Intent', 'AI Scoring'],
+    back: 'Back',
+    upload: {
+      title: 'Upload a photo to get evaluated',
+      subtitle: 'A clear, full-body photo gives you the most accurate score.',
+      dropTitle: 'Drag a photo here, or click to browse',
+      dropHint: 'JPG, PNG · up to 10MB',
+      or: 'or',
+      browseButton: 'Choose a File',
+      sampleButton: 'Try a Sample Photo',
+      changeButton: 'Choose a Different Photo',
+      selectedLabel: 'Your photo is ready',
+      sampleSelectedLabel: "You're trying the sample photo",
+      nextButton: 'Next: Pick TPO',
+    },
+    tpo: {
+      title: "What's the occasion?",
+      subtitle: 'The same outfit is scored differently depending on the situation. Pick one.',
+      nextButton: 'Next: Style Intent',
+    },
+    intent: {
+      title: 'Is this look intentional?',
+      subtitle: 'Declaring an experimental intent adjusts the scoring so it never unfairly marks you down.',
+      classicTitle: 'Classic',
+      classicDesc: 'A balanced, fundamentals-first style. Scored carefully against general standards.',
+      experimentalTitle: 'Experimental (Avant-garde)',
+      experimentalDesc: 'Bold oversizing and mismatching are respected as intent. Creativity factors into the score.',
+      nextButton: 'Start Evaluation',
+    },
+    analyzing: {
+      title: 'AI is analyzing your style',
+      subtitle: 'This usually takes just a few seconds. Hang tight.',
+      steps: [
+        'Analyzing your photo',
+        'Checking color harmony and fit',
+        'Scoring for {tpo}',
+        'Writing detailed feedback',
+      ],
+      doneTitle: 'Evaluation complete!',
+      doneSubtitle: 'The results screen (score, feedback, Before/After) continues in the next stage.',
+      resetButton: 'Start Over',
+    },
+  },
 };
 
 export default en;

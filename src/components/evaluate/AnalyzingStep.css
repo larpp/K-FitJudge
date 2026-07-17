@@ -1,0 +1,95 @@
+.analyzing-step { max-width: 480px; margin: 0 auto; text-align: center; }
+
+.analyzing-step__badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+.analyzing-step__badge .icon { width: 30px; height: 30px; }
+.analyzing-step__badge.is-pulsing { animation: kfj-pulse 1.6s ease-in-out infinite; }
+
+.analyzing-progress {
+  margin: 28px 0 24px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--border);
+  overflow: hidden;
+}
+.analyzing-progress__fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--accent), var(--primary));
+  transition: width .5s ease;
+}
+
+.analyzing-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+.analyzing-list__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  transition: .2s;
+}
+.analyzing-list__item.is-active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.analyzing-list__item.is-done {
+  background: var(--green-soft);
+  color: #1d7a54;
+}
+.analyzing-list__dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+}
+.analyzing-list__item.is-active .analyzing-list__dot {
+  border-color: var(--accent);
+  animation: kfj-pulse 1.2s ease-in-out infinite;
+}
+.analyzing-list__item.is-done .analyzing-list__dot {
+  border: none;
+  background: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.analyzing-list__item.is-done .analyzing-list__dot .icon { width: 14px; height: 14px; color: #fff; }
+
+.analyzing-done__title { margin-top: 4px; }
+.analyzing-done__subtitle {
+  margin-top: 10px;
+  color: var(--text-muted);
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@keyframes kfj-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .55; transform: scale(1.12); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .analyzing-step__badge.is-pulsing,
+  .analyzing-list__item.is-active .analyzing-list__dot {
+    animation: none;
+  }
+}
