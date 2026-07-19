@@ -176,8 +176,7 @@ const ko = {
   },
   pricing: {
     title: '요금제',
-    subtitle: '지금은 모든 기능을 무료로 체험할 수 있어요. 결제 연동은 PART 2에서 진행돼요.',
-    badge: '준비 중 · 결제 연동 전',
+    subtitle: '무료로 시작하고, 필요할 때 Pro로 업그레이드하세요.',
     plans: [
       {
         name: '무료',
@@ -190,13 +189,32 @@ const ko = {
       {
         name: '프로',
         price: '₩9,900',
+        priceUsd: '$7.90',
         period: '월',
         features: ['무제한 AI 평가', '세부 피드백 우선 제공', '평가 히스토리 저장', '워터마크 없는 공유'],
-        cta: '준비 중',
+        cta: '구독하기',
         highlighted: true,
       },
     ],
-    note: '결제(Toss Payments/Stripe)와 웹훅 검증은 PART 2 백엔드 가이드에서 연결해요.',
+    note: '테스트 모드 결제예요. 실제 카드가 청구되지 않는 테스트 키로 연동되어 있어요.',
+    methodLabel: '결제 수단',
+    methodToss: 'Toss Payments (원화)',
+    methodPaypal: 'PayPal (USD)',
+    loginRequired: '결제하려면 먼저 로그인해주세요',
+    loginCta: '로그인하러 가기',
+    proActiveBadge: 'Pro 이용 중',
+    processing: '결제창을 여는 중...',
+  },
+  payment: {
+    tossCheckingTitle: '결제를 확인하고 있어요...',
+    tossSuccessTitle: '결제가 완료됐어요!',
+    tossSuccessDesc: 'Pro 플랜이 활성화됐어요. 이제 모든 기능을 제한 없이 이용할 수 있어요.',
+    tossFailTitle: '결제가 취소됐어요',
+    tossFailDescFallback: '결제가 완료되지 않았어요. 다시 시도해주세요.',
+    backToPricing: '요금제로 돌아가기',
+    goToMypage: '마이페이지로 이동',
+    paypalSuccessTitle: '결제가 완료됐어요!',
+    paypalErrorFallback: 'PayPal 결제 중 오류가 발생했어요.',
   },
 };
 

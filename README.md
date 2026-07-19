@@ -16,17 +16,17 @@
 - [x] ① 회원가입·로그인 — Supabase Auth 연동 (이메일 가입/로그인, Google은 제공자 설정 후 사용 가능)
 - [x] ② 마이페이지 — `profiles` 테이블 + RLS 연동 (본인 프로필만 조회/수정)
 - [x] ③ 구글 로그인 — Google OAuth 클라이언트 설정 (Supabase Google Provider 연동, 로컬 테스트 확인 완료)
-- [ ] ④ 결제
+- [x] ④ 결제 — Toss Payments(원화) + PayPal(USD), Supabase Edge Functions로 서버 승인. 코드는 완료, 실제 PG 키 발급·엣지 함수 배포는 별도 진행 필요
 
 ## 기술 스택
 
-React + TypeScript + Vite, React Router. 디자인 토큰은 CSS 변수로 관리합니다(`src/styles/tokens.css`). 인증·DB는 Supabase(`@supabase/supabase-js`)를 사용합니다.
+React + TypeScript + Vite, React Router. 디자인 토큰은 CSS 변수로 관리합니다(`src/styles/tokens.css`). 인증·DB·결제 서버 로직은 Supabase(`@supabase/supabase-js` + Edge Functions)를 사용합니다.
 
 ## 실행
 
 ```bash
 npm install
-cp .env.example .env.local   # Supabase 프로젝트 URL과 anon key를 채워주세요
+cp .env.example .env.local   # Supabase/Toss/PayPal 클라이언트 키를 채워주세요
 npm run dev      # 개발 서버
 npm run build    # 프로덕션 빌드
 ```
@@ -35,4 +35,29 @@ npm run build    # 프로덕션 빌드
 
 ## Supabase DB 스키마
 
-`supabase/schema.sql`을 Supabase 대시보드 → SQL Editor에서 실행하면 `profiles` 테이블과 RLS 정책, 회원가입 시 프로필 자동 생성 트리거가 설정됩니다.
+Supabase 대시보드 → SQL Editor에서 순서대로 실행하세요.
+
+1. `supabase/schema.sql` — `profiles` 테이블, RLS 정책, 회원가입 시 프로필 자동 생성 트리거
+2. `supabase/schema_payments.sql` — `orders` 테이블, `profiles.plan` 컬럼 (결제 완료 시 'pro'로 전환)
+
+## Supabase Edge Functions (결제 서버 로직)
+
+`supabase/functions/`에 있는 함수들을 배포해야 결제가 동작합니다.
+
+```bash
+npm install -g supabase
+supabase login
+supabase link --project-ref <프로젝트 ref>
+supabase functions deploy toss-create-order
+supabase functions deploy toss-confirm
+supabase functions deploy paypal-create-order
+supabase functions deploy paypal-capture-order
+
+# 시크릿 키는 여기(서버)에만 설정 — 절대 .env(프론트)에 넣지 않는다
+supabase secrets set TOSS_SECRET_KEY=your_toss_secret_key
+supabase secrets set PAYPAL_CLIENT_ID=your_paypal_client_id
+supabase secrets set PAYPAL_CLIENT_SECRET=your_paypal_client_secret
+supabase secrets set PAYPAL_API_BASE=https://api-m.sandbox.paypal.com
+```
+
+`SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`는 Edge Functions 런타임이 자동으로 주입하므로 별도 설정이 필요 없습니다.

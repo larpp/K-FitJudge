@@ -6,6 +6,7 @@ import EvaluatePage from './pages/EvaluatePage';
 import LoginPage from './pages/LoginPage';
 import MyPage from './pages/MyPage';
 import PricingPage from './pages/PricingPage';
+import TossReturnPage from './pages/TossReturnPage';
 
 export default function App() {
   return (
@@ -18,6 +19,8 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/payment/toss/success" element={<TossReturnPage />} />
+          <Route path="/payment/toss/fail" element={<TossReturnPage />} />
         </Routes>
       </main>
       <Footer />
