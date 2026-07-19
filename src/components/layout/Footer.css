@@ -38,12 +38,21 @@
   letter-spacing: .02em;
 }
 .site-footer__col a,
-.site-footer__col span {
+.site-footer__col span,
+.site-footer__link-btn {
   display: block;
   color: rgba(255, 255, 255, 0.85);
   font-size: 14px;
   padding: 4px 0;
 }
+.site-footer__link-btn {
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.site-footer__link-btn:hover { color: #fff; }
 .site-footer__bottom {
   display: flex;
   justify-content: space-between;
