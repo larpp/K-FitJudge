@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import type { Session, User } from '@supabase/supabase-js';
+import type { Session } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 
 const NOT_CONFIGURED_ERROR =
@@ -10,6 +10,11 @@ export interface AppUser {
   name: string;
   email: string;
   provider: string;
+  bio: string;
+}
+
+interface ProfileRow {
+  name: string;
   bio: string;
 }
 
@@ -30,41 +35,75 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function toAppUser(user: User | null | undefined): AppUser | null {
-  if (!user) return null;
-  const meta = user.user_metadata ?? {};
-  return {
-    id: user.id,
-    email: user.email ?? '',
-    name: meta.name || user.email?.split('@')[0] || 'User',
-    bio: meta.bio ?? '',
-    provider: user.app_metadata?.provider ?? 'email',
-  };
+function fallbackName(email: string) {
+  return email.split('@')[0] || 'User';
+}
+
+// profiles 테이블에 아직 행이 없는 경우(예: 트리거 도입 전 가입한 계정)를 대비해
+// 없으면 auth 메타데이터 기반 기본값으로 대체한다. 실제 행은 최초 저장 시 upsert로 생성된다.
+async function fetchProfile(userId: string, email: string, metaName?: string): Promise<ProfileRow> {
+  const { data } = await supabase.from('profiles').select('name,bio').eq('id', userId).maybeSingle();
+  if (data) return { name: data.name || fallbackName(email), bio: data.bio ?? '' };
+  return { name: metaName || fallbackName(email), bio: '' };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [sessionLoading, setSessionLoading] = useState(true);
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth
       .getSession()
       .then(({ data }) => setSession(data.session))
       .catch(() => setSession(null))
-      .finally(() => setLoading(false));
+      .finally(() => setSessionLoading(false));
 
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
-      setLoading(false);
+      setSessionLoading(false);
     });
 
     return () => subscription.subscription.unsubscribe();
   }, []);
 
-  const value = useMemo<AuthContextValue>(
-    () => ({
-      user: toAppUser(session?.user),
-      loading,
+  const userId = session?.user?.id ?? null;
+
+  useEffect(() => {
+    if (!userId || !session?.user) {
+      setProfile(null);
+      return;
+    }
+    let cancelled = false;
+    setProfileLoading(true);
+    fetchProfile(userId, session.user.email ?? '', session.user.user_metadata?.name)
+      .then((row) => {
+        if (!cancelled) setProfile(row);
+      })
+      .finally(() => {
+        if (!cancelled) setProfileLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
+  const value = useMemo<AuthContextValue>(() => {
+    const user: AppUser | null = session?.user
+      ? {
+          id: session.user.id,
+          email: session.user.email ?? '',
+          name: profile?.name ?? fallbackName(session.user.email ?? ''),
+          bio: profile?.bio ?? '',
+          provider: session.user.app_metadata?.provider ?? 'email',
+        }
+      : null;
+
+    return {
+      user,
+      loading: sessionLoading || profileLoading,
       login: async ({ email, password }) => {
         if (!isSupabaseConfigured) return { error: NOT_CONFIGURED_ERROR };
         try {
@@ -107,16 +146,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       updateProfile: async ({ name, bio }) => {
         if (!isSupabaseConfigured) return { error: NOT_CONFIGURED_ERROR };
+        if (!session?.user) return { error: 'Not signed in.' };
         try {
-          const { error } = await supabase.auth.updateUser({ data: { name, bio } });
-          return error ? { error: error.message } : {};
+          const { error } = await supabase
+            .from('profiles')
+            .upsert({ id: session.user.id, name, bio, updated_at: new Date().toISOString() });
+          if (error) return { error: error.message };
+          setProfile({ name, bio });
+          return {};
         } catch (err) {
           return { error: err instanceof Error ? err.message : String(err) };
         }
       },
-    }),
-    [session, loading],
-  );
+    };
+  }, [session, sessionLoading, profile, profileLoading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

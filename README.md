@@ -14,13 +14,13 @@
 ### PART 2 진행 상황
 
 - [x] ① 회원가입·로그인 — Supabase Auth 연동 (이메일 가입/로그인, Google은 제공자 설정 후 사용 가능)
-- [ ] ② 마이페이지 — DB 연동
+- [x] ② 마이페이지 — `profiles` 테이블 + RLS 연동 (본인 프로필만 조회/수정)
 - [ ] ③ 구글 로그인 — Google OAuth 클라이언트 설정
 - [ ] ④ 결제
 
 ## 기술 스택
 
-React + TypeScript + Vite, React Router. 디자인 토큰은 CSS 변수로 관리합니다(`src/styles/tokens.css`). 인증은 Supabase Auth(`@supabase/supabase-js`)를 사용합니다.
+React + TypeScript + Vite, React Router. 디자인 토큰은 CSS 변수로 관리합니다(`src/styles/tokens.css`). 인증·DB는 Supabase(`@supabase/supabase-js`)를 사용합니다.
 
 ## 실행
 
@@ -32,3 +32,7 @@ npm run build    # 프로덕션 빌드
 ```
 
 `.env.local`이 없으면 화면은 정상적으로 뜨지만 로그인/회원가입 시 "Supabase가 설정되지 않았어요"라는 안내가 표시됩니다.
+
+## Supabase DB 스키마
+
+`supabase/schema.sql`을 Supabase 대시보드 → SQL Editor에서 실행하면 `profiles` 테이블과 RLS 정책, 회원가입 시 프로필 자동 생성 트리거가 설정됩니다.
