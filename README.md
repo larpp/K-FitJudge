@@ -9,14 +9,14 @@
 - [x] Stage 3 — 점수/피드백 결과 + Before/After 슬라이더
 - [x] Stage 4 — 마이페이지/로그인 더미 + 반응형 점검
 
-프론트엔드가 완성되었습니다. PART 2 백엔드 연동을 순서대로 진행 중입니다.
+프론트엔드(PART 1)와 백엔드 연동(PART 2)이 모두 완료되었습니다. 🎉
 
 ### PART 2 진행 상황
 
-- [x] ① 회원가입·로그인 — Supabase Auth 연동 (이메일 가입/로그인, Google은 제공자 설정 후 사용 가능)
-- [x] ② 마이페이지 — `profiles` 테이블 + RLS 연동 (본인 프로필만 조회/수정)
-- [x] ③ 구글 로그인 — Google OAuth 클라이언트 설정 (Supabase Google Provider 연동, 로컬 테스트 확인 완료)
-- [x] ④ 결제 — Toss Payments(원화) + PayPal(USD), Supabase Edge Functions로 서버 승인. 코드는 완료, 실제 PG 키 발급·엣지 함수 배포는 별도 진행 필요
+- [x] ① 회원가입·로그인 — Supabase Auth 연동, 실제 가입/로그인 테스트 완료
+- [x] ② 마이페이지 — `profiles` 테이블 + RLS 연동 (본인 프로필만 조회/수정), 실제 저장 테스트 완료
+- [x] ③ 구글 로그인 — Google OAuth 클라이언트 설정, 실제 로그인 테스트 완료
+- [x] ④ 결제 — Toss Payments(원화) + PayPal(USD), Supabase Edge Functions로 서버 승인. **실제 테스트 결제로 Pro 플랜 전환까지 확인 완료**
 
 ## 기술 스택
 
