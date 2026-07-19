@@ -15,7 +15,7 @@
 
 - [x] ① 회원가입·로그인 — Supabase Auth 연동 (이메일 가입/로그인, Google은 제공자 설정 후 사용 가능)
 - [x] ② 마이페이지 — `profiles` 테이블 + RLS 연동 (본인 프로필만 조회/수정)
-- [ ] ③ 구글 로그인 — Google OAuth 클라이언트 설정
+- [x] ③ 구글 로그인 — Google OAuth 클라이언트 설정 (Supabase Google Provider 연동, 로컬 테스트 확인 완료)
 - [ ] ④ 결제
 
 ## 기술 스택
