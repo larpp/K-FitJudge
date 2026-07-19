@@ -9,7 +9,7 @@ import './LoginPage.css';
 
 export default function LoginPage() {
   const { t } = useI18n();
-  const { user, login, loginWithGoogle } = useAuth();
+  const { user, loading: authLoading, login, signup, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const a = t.auth;
 
@@ -17,21 +17,55 @@ export default function LoginPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
   useEffect(() => {
-    if (user) navigate('/mypage', { replace: true });
-  }, [user, navigate]);
+    if (!authLoading && user) navigate('/mypage', { replace: true });
+  }, [user, authLoading, navigate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login({ name, email });
+    setError(null);
+    setSubmitting(true);
+    const result = mode === 'login' ? await login({ email, password }) : await signup({ name, email, password });
+    setSubmitting(false);
+
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+    if (result.needsConfirmation) {
+      setNeedsConfirmation(true);
+      return;
+    }
     navigate('/mypage');
   };
 
-  const handleGoogle = () => {
-    loginWithGoogle();
-    navigate('/mypage');
+  const handleGoogle = async () => {
+    setError(null);
+    const result = await loginWithGoogle();
+    if (result.error) setError(result.error);
+    // 성공 시 Google 페이지로 리디렉션되므로 여기서 별도 네비게이션은 하지 않는다.
   };
+
+  if (needsConfirmation) {
+    return (
+      <div className="login-page">
+        <div className="card login-card login-confirmation">
+          <div className="login-confirmation__icon">
+            <Icon name="check" size={24} />
+          </div>
+          <h1>{a.confirmationTitle}</h1>
+          <p>{a.confirmationDesc}</p>
+          <Button variant="outline" onClick={() => setNeedsConfirmation(false)}>
+            {a.loginTab}
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="login-page">
@@ -40,14 +74,20 @@ export default function LoginPage() {
           <button
             type="button"
             className={mode === 'login' ? 'is-active' : ''}
-            onClick={() => setMode('login')}
+            onClick={() => {
+              setMode('login');
+              setError(null);
+            }}
           >
             {a.loginTab}
           </button>
           <button
             type="button"
             className={mode === 'signup' ? 'is-active' : ''}
-            onClick={() => setMode('signup')}
+            onClick={() => {
+              setMode('signup');
+              setError(null);
+            }}
           >
             {a.signupTab}
           </button>
@@ -93,8 +133,15 @@ export default function LoginPage() {
             />
           </div>
 
-          <Button type="submit" block size="lg">
-            {mode === 'login' ? a.loginButton : a.signupButton}
+          {error && (
+            <p className="login-error">
+              {a.errorPrefix}
+              {error}
+            </p>
+          )}
+
+          <Button type="submit" block size="lg" disabled={submitting}>
+            {submitting ? a.submitting : mode === 'login' ? a.loginButton : a.signupButton}
           </Button>
         </form>
 
@@ -107,7 +154,13 @@ export default function LoginPage() {
 
         <div className="login-switch">
           {mode === 'login' ? a.switchToSignup : a.switchToLogin}
-          <button type="button" onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}>
+          <button
+            type="button"
+            onClick={() => {
+              setMode(mode === 'login' ? 'signup' : 'login');
+              setError(null);
+            }}
+          >
             {mode === 'login' ? a.signupTab : a.loginTab}
           </button>
         </div>

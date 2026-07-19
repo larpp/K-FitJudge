@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from '../components/ui/Icon';
 import Button from '../components/ui/Button';
@@ -10,12 +10,24 @@ import './MyPage.css';
 
 export default function MyPage() {
   const { t, locale } = useI18n();
-  const { user, logout, updateProfile } = useAuth();
+  const { user, loading: authLoading, logout, updateProfile } = useAuth();
   const m = t.mypage;
 
-  const [name, setName] = useState(user?.name ?? '');
-  const [bio, setBio] = useState(user?.bio ?? '');
+  const [name, setName] = useState('');
+  const [bio, setBio] = useState('');
   const [showSaved, setShowSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name);
+      setBio(user.bio);
+    }
+  }, [user]);
+
+  if (authLoading) {
+    return <div className="container mypage-loading" aria-busy="true" />;
+  }
 
   if (!user) {
     return (
@@ -34,9 +46,14 @@ export default function MyPage() {
     );
   }
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfile({ name, bio });
+    setSaveError(null);
+    const result = await updateProfile({ name, bio });
+    if (result.error) {
+      setSaveError(result.error);
+      return;
+    }
     setShowSaved(true);
     window.setTimeout(() => setShowSaved(false), 2000);
   };
@@ -82,6 +99,7 @@ export default function MyPage() {
               onChange={(e) => setBio(e.target.value)}
             />
           </div>
+          {saveError && <p className="mypage-error">{t.auth.errorPrefix}{saveError}</p>}
           <div className="mypage-form__footer">
             <Button type="submit">{m.saveButton}</Button>
             {showSaved && (

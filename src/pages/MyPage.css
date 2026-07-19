@@ -4,6 +4,20 @@
   padding: 48px 20px 80px;
 }
 
+.mypage-loading {
+  min-height: 320px;
+}
+
+.mypage-error {
+  margin: -4px 0 14px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: #fdecef;
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .mypage-protected {
   max-width: 380px;
   margin: 80px auto;

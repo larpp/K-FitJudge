@@ -115,3 +115,34 @@
   line-height: 1.6;
 }
 .login-disclaimer .icon { flex-shrink: 0; margin-top: 2px; }
+
+.login-error {
+  margin: -4px 0 16px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: #fdecef;
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.login-confirmation {
+  text-align: center;
+  padding: 40px 28px;
+}
+.login-confirmation__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--green-soft);
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.login-confirmation p {
+  color: var(--text-muted);
+  margin: 10px 0 22px;
+  line-height: 1.6;
+}
