@@ -119,6 +119,13 @@ const ko = {
       viewResultButton: '결과 확인하기',
       resetButton: '처음부터 다시 해보기',
     },
+    limit: {
+      title: '이번 달 무료 평가를 다 쓰셨어요',
+      desc: '무료 플랜은 월 3회까지 평가할 수 있어요. Pro로 업그레이드하면 무제한으로 이용할 수 있어요.',
+      upgradeCta: 'Pro 요금제 보기',
+      resetCta: '처음으로 돌아가기',
+      genericErrorTitle: '평가를 저장하지 못했어요',
+    },
     result: {
       eyebrow: '평가 완료',
       scoreSuffix: '/ 100',

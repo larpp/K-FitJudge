@@ -121,6 +121,13 @@ const en: typeof ko = {
       viewResultButton: 'View Results',
       resetButton: 'Start Over',
     },
+    limit: {
+      title: "You've used your free evaluations for this month",
+      desc: 'The Free plan includes 3 evaluations a month. Upgrade to Pro for unlimited evaluations.',
+      upgradeCta: 'See Pro Plan',
+      resetCta: 'Back to Start',
+      genericErrorTitle: "Couldn't save your evaluation",
+    },
     result: {
       eyebrow: 'Evaluation Complete',
       scoreSuffix: '/ 100',

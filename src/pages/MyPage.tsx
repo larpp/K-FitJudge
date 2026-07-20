@@ -5,8 +5,15 @@ import Button from '../components/ui/Button';
 import { useI18n } from '../i18n/I18nProvider';
 import { useAuth } from '../auth/AuthProvider';
 import { tpoOptions } from '../data/tpoOptions';
-import { mockHistory } from '../data/mockHistory';
+import { supabase } from '../lib/supabaseClient';
 import './MyPage.css';
+
+interface EvaluationRow {
+  id: string;
+  tpo: string;
+  overall_score: number;
+  created_at: string;
+}
 
 export default function MyPage() {
   const { t, locale } = useI18n();
@@ -17,12 +24,32 @@ export default function MyPage() {
   const [bio, setBio] = useState('');
   const [showSaved, setShowSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [history, setHistory] = useState<EvaluationRow[] | null>(null);
 
   useEffect(() => {
     if (user) {
       setName(user.name);
       setBio(user.bio);
     }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      setHistory(null);
+      return;
+    }
+    let cancelled = false;
+    supabase
+      .from('evaluations')
+      .select('id, tpo, overall_score, created_at')
+      .order('created_at', { ascending: false })
+      .limit(10)
+      .then(({ data }) => {
+        if (!cancelled) setHistory(data ?? []);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   if (authLoading) {
@@ -114,28 +141,46 @@ export default function MyPage() {
 
       <section className="mypage-section">
         <h2>{m.historyTitle}</h2>
-        <div className="history-list">
-          {mockHistory.map((entry) => {
-            const tpo = tpoOptions.find((o) => o.key === entry.tpoKey)!;
-            return (
-              <div className="card history-card" key={entry.id}>
-                <div className="history-card__icon">
-                  <Icon name={tpo.icon} size={18} />
-                </div>
-                <div className="history-card__body">
-                  <div className="history-card__title">
-                    {locale === 'ko' ? tpo.labelKo : tpo.labelEn}
+        {history === null ? (
+          <div className="history-list" aria-busy="true" />
+        ) : history.length === 0 ? (
+          <div className="card mypage-protected">
+            <div className="mypage-protected__icon">
+              <Icon name="shirt" size={26} />
+            </div>
+            <h1>{m.historyEmptyTitle}</h1>
+            <p>{m.historyEmptyDesc}</p>
+            <Link to="/evaluate">
+              <Button>{m.historyEmptyCta}</Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="history-list">
+            {history.map((entry) => {
+              const tpo = tpoOptions.find((o) => o.key === entry.tpo);
+              if (!tpo) return null;
+              return (
+                <div className="card history-card" key={entry.id}>
+                  <div className="history-card__icon">
+                    <Icon name={tpo.icon} size={18} />
                   </div>
-                  <div className="history-card__date">{entry.date}</div>
+                  <div className="history-card__body">
+                    <div className="history-card__title">
+                      {locale === 'ko' ? tpo.labelKo : tpo.labelEn}
+                    </div>
+                    <div className="history-card__date">
+                      {new Date(entry.created_at).toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}
+                    </div>
+                  </div>
+                  <div className="history-card__score">
+                    {entry.overall_score}
+                    <span>/100</span>
+                  </div>
                 </div>
-                <div className="history-card__score">
-                  {entry.score}
-                  <span>/100</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </section>
     </div>
   );
