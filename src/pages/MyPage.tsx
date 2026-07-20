@@ -6,6 +6,7 @@ import { useI18n } from '../i18n/I18nProvider';
 import { useAuth } from '../auth/AuthProvider';
 import { tpoOptions } from '../data/tpoOptions';
 import { supabase } from '../lib/supabaseClient';
+import { invokeFunction } from '../lib/payments/invokeFunction';
 import './MyPage.css';
 
 interface EvaluationRow {
@@ -25,6 +26,8 @@ export default function MyPage() {
   const [showSaved, setShowSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [history, setHistory] = useState<EvaluationRow[] | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -42,6 +45,7 @@ export default function MyPage() {
     supabase
       .from('evaluations')
       .select('id, tpo, overall_score, created_at')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
       .limit(10)
       .then(({ data }) => {
@@ -83,6 +87,20 @@ export default function MyPage() {
     }
     setShowSaved(true);
     window.setTimeout(() => setShowSaved(false), 2000);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm(m.historyDeleteConfirm)) return;
+    setDeletingId(id);
+    setDeleteError(null);
+    try {
+      await invokeFunction('delete-evaluation', { evaluationId: id });
+      setHistory((prev) => prev?.filter((entry) => entry.id !== id) ?? prev);
+    } catch {
+      setDeleteError(m.historyDeleteError);
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -141,6 +159,7 @@ export default function MyPage() {
 
       <section className="mypage-section">
         <h2>{m.historyTitle}</h2>
+        {deleteError && <p className="mypage-error">{deleteError}</p>}
         {history === null ? (
           <div className="history-list" aria-busy="true" />
         ) : history.length === 0 ? (
@@ -160,24 +179,35 @@ export default function MyPage() {
               const tpo = tpoOptions.find((o) => o.key === entry.tpo);
               if (!tpo) return null;
               return (
-                <Link className="card history-card" to={`/mypage/history/${entry.id}`} key={entry.id}>
-                  <div className="history-card__icon">
-                    <Icon name={tpo.icon} size={18} />
-                  </div>
-                  <div className="history-card__body">
-                    <div className="history-card__title">
-                      {locale === 'ko' ? tpo.labelKo : tpo.labelEn}
+                <div className="card history-card" key={entry.id}>
+                  <Link className="history-card__link" to={`/mypage/history/${entry.id}`}>
+                    <div className="history-card__icon">
+                      <Icon name={tpo.icon} size={18} />
                     </div>
-                    <div className="history-card__date">
-                      {new Date(entry.created_at).toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}
+                    <div className="history-card__body">
+                      <div className="history-card__title">
+                        {locale === 'ko' ? tpo.labelKo : tpo.labelEn}
+                      </div>
+                      <div className="history-card__date">
+                        {new Date(entry.created_at).toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}
+                      </div>
                     </div>
-                  </div>
-                  <div className="history-card__score">
-                    {entry.overall_score}
-                    <span>/100</span>
-                  </div>
-                  <Icon name="chevronRight" size={16} className="history-card__chevron" />
-                </Link>
+                    <div className="history-card__score">
+                      {entry.overall_score}
+                      <span>/100</span>
+                    </div>
+                    <Icon name="chevronRight" size={16} className="history-card__chevron" />
+                  </Link>
+                  <button
+                    type="button"
+                    className="history-card__delete"
+                    aria-label={m.historyDeleteCta}
+                    disabled={deletingId === entry.id}
+                    onClick={() => handleDelete(entry.id)}
+                  >
+                    <Icon name="trash" size={16} />
+                  </button>
+                </div>
               );
             })}
           </div>

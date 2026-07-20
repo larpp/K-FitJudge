@@ -46,6 +46,7 @@ export default function HistoryDetailPage() {
           'id, tpo, intent, overall_score, categories, strengths, improvements, photo_path, edited_photo_path, created_at',
         )
         .eq('id', id)
+        .is('deleted_at', null)
         .maybeSingle();
 
       if (cancelled) return;

@@ -190,6 +190,9 @@ const ko = {
     historyDetailBack: '마이페이지로 돌아가기',
     historyNotFoundTitle: '평가 기록을 찾을 수 없어요',
     historyNotFoundDesc: '삭제되었거나 존재하지 않는 기록이에요.',
+    historyDeleteCta: '이 기록 삭제하기',
+    historyDeleteConfirm: '이 평가 기록을 삭제할까요? 목록에서 사라지며 되돌릴 수 없어요.',
+    historyDeleteError: '기록을 삭제하지 못했어요. 잠시 후 다시 시도해주세요.',
   },
   pricing: {
     title: '요금제',

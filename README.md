@@ -22,6 +22,7 @@
 
 - [x] PART 3 — `evaluations` 테이블에 평가 결과 저장, 마이페이지 히스토리 실데이터화, 무료 플랜 월 3회 한도를 서버(Edge Function)에서 강제
 - [x] 히스토리 상세 보기 — 마이페이지에서 과거 평가 클릭 시 당시 결과 화면(점수·피드백·사진)을 그대로 다시 볼 수 있음. 플랜이 바뀌어도 과거 기록은 항상 열람 가능
+- [x] 히스토리 개별 삭제 — 소프트 삭제(`deleted_at`)라서 목록/상세에서는 사라지지만, 무료 플랜의 "이번 달 평가 횟수" 집계에서는 계속 카운트됨(삭제로 한도 우회 불가)
 - [x] PART 3.5 — AI 실연동. 비전 피드백은 Hugging Face의 **Qwen3-VL**(Apache-2.0, 무료: 8B / Pro: 235B-A22B), Pro 전용 이미지 개선은 **Qwen-Image-Edit-2509**(Apache-2.0)를 fal.ai 서버리스로 호출. 코드는 완성됐고 실제 동작을 위해서는 아래 "AI 연동 설정"에서 `HF_TOKEN`/`FAL_KEY` 시크릿을 등록해야 함
 - [ ] PART 4 — 정기결제 전환 + 구독 취소 기능
 - [ ] PART 5 — 보안 점검, 이용약관/개인정보처리방침, 성능 최적화
@@ -51,6 +52,7 @@ Supabase 대시보드 → SQL Editor에서 순서대로 실행하세요.
 3. `supabase/schema_evaluations.sql` — `evaluations` 테이블(RLS: 본인 조회만, 쓰기는 서버 전용)
 4. `supabase/schema_evaluation_photos.sql` — `evaluations.photo_path` 컬럼 + 평가 사진용 비공개 Storage 버킷(`evaluation-photos`) 및 RLS(본인 사진만 업로드/조회)
 5. `supabase/schema_image_edit.sql` — `evaluations.edited_photo_path` 컬럼 (Pro AI 이미지 개선 결과 저장용)
+6. `supabase/schema_history_delete.sql` — `evaluations.deleted_at` 컬럼 (히스토리 소프트 삭제용)
 
 ## Supabase Edge Functions (서버 로직)
 
@@ -65,6 +67,7 @@ npx supabase functions deploy paypal-create-order
 npx supabase functions deploy paypal-capture-order
 npx supabase functions deploy evaluate-photo
 npx supabase functions deploy generate-image-edit
+npx supabase functions deploy delete-evaluation
 
 # 시크릿 키는 여기(서버)에만 설정 — 절대 .env(프론트)에 넣지 않는다
 npx supabase secrets set TOSS_SECRET_KEY=your_toss_secret_key
