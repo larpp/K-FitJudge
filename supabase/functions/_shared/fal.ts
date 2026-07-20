@@ -45,7 +45,7 @@ export async function editImageWithFal(opts: {
       negative_prompt: opts.negativePrompt ?? '',
       // 기본값(4)은 지시를 느슨하게 따라서 얼굴/배경까지 다시 그리는 경우가 많았다.
       // 값을 높여 프롬프트(=원본 보존 지시)를 더 엄격하게 따르게 한다.
-      guidance_scale: 7.5,
+      guidance_scale: 9,
     }),
   });
   if (!submitRes.ok) {
