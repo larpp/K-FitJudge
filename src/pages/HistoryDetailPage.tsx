@@ -40,7 +40,7 @@ export default function HistoryDetailPage() {
     let cancelled = false;
 
     (async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('evaluations')
         .select(
           'id, tpo, intent, overall_score, categories, strengths, improvements, photo_path, edited_photo_path, created_at',
@@ -49,6 +49,9 @@ export default function HistoryDetailPage() {
         .maybeSingle();
 
       if (cancelled) return;
+      // 조회 자체가 에러(예: 최근에 추가된 컬럼이 반영 안 됨)로 실패한 경우를 "기록 없음"과
+      // 구분해서 콘솔에 남겨야 나중에 원인을 바로 알 수 있다.
+      if (error) console.error('Failed to load evaluation detail:', error.message);
       setRow((data as EvaluationRow | null) ?? null);
 
       if (data?.photo_path) {
