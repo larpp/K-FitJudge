@@ -1,7 +1,11 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Icon from '../ui/Icon';
 import Button from '../ui/Button';
 import BeforeAfterSlider from '../ui/BeforeAfterSlider';
 import { useI18n } from '../../i18n/I18nProvider';
+import { useAuth } from '../../auth/AuthProvider';
+import { invokeFunction } from '../../lib/payments/invokeFunction';
 import type { TpoOption } from '../../data/tpoOptions';
 import type { StyleIntent } from './IntentStep';
 import type { MockResult } from '../../data/mockScoring';
@@ -12,13 +16,51 @@ interface ResultStepProps {
   result: MockResult;
   tpo: TpoOption;
   intent: StyleIntent;
-  previewUrl: string;
+  previewUrl?: string | null;
+  dateLabel?: string;
+  backLabel?: string;
+  evaluationId?: string | null;
+  isSample?: boolean;
+  initialEditedUrl?: string | null;
   onReset: () => void;
 }
 
-export default function ResultStep({ result, tpo, intent, previewUrl, onReset }: ResultStepProps) {
+export default function ResultStep({
+  result,
+  tpo,
+  intent,
+  previewUrl,
+  dateLabel,
+  backLabel,
+  evaluationId,
+  isSample,
+  initialEditedUrl,
+  onReset,
+}: ResultStepProps) {
   const { t, locale } = useI18n();
+  const { user } = useAuth();
   const r = t.evaluate.result;
+
+  const [editedUrl, setEditedUrl] = useState<string | null>(initialEditedUrl ?? null);
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState(false);
+
+  const canGenerate = Boolean(evaluationId && !isSample);
+  const isPro = user?.plan === 'pro';
+
+  const handleGenerate = async () => {
+    if (!evaluationId) return;
+    setGenerating(true);
+    setGenError(false);
+    try {
+      const res = await invokeFunction<{ editedPhotoUrl: string }>('generate-image-edit', { evaluationId });
+      setEditedUrl(res.editedPhotoUrl);
+    } catch {
+      setGenError(true);
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const grade =
     result.overall >= 90 ? r.gradeExcellent : result.overall >= 75 ? r.gradeGood : r.gradeFair;
@@ -30,6 +72,7 @@ export default function ResultStep({ result, tpo, intent, previewUrl, onReset }:
     <div className="result-step">
       <div className="result-header">
         <span className="badge badge-accent">{r.eyebrow}</span>
+        {dateLabel && <p className="result-date">{dateLabel}</p>}
         <div className="result-score">
           <strong>{result.overall}</strong>
           <span>{r.scoreSuffix}</span>
@@ -104,33 +147,57 @@ export default function ResultStep({ result, tpo, intent, previewUrl, onReset }:
         </div>
       </section>
 
-      <section className="result-section">
-        <h2>{r.beforeAfterTitle}</h2>
-        <BeforeAfterSlider
-          beforeLabel={t.home.beforeLabel}
-          afterLabel={r.afterMockLabel}
-          hint={t.home.sliderHint}
-          beforeSlot={
-            <div className="result-photo-frame">
-              <img src={previewUrl} alt="" />
-            </div>
-          }
-          afterSlot={
-            <div className="result-photo-frame">
-              <img src={previewUrl} alt="" />
-              <div className="result-photo-frame__overlay">
-                <Icon name="sparkle" size={40} />
+      {previewUrl && (
+        <section className="result-section">
+          <h2>{r.beforeAfterTitle}</h2>
+          <BeforeAfterSlider
+            beforeLabel={t.home.beforeLabel}
+            afterLabel={editedUrl ? r.afterGenerateCta : r.afterMockLabel}
+            hint={t.home.sliderHint}
+            beforeSlot={
+              <div className="result-photo-frame">
+                <img src={previewUrl} alt="" />
               </div>
+            }
+            afterSlot={
+              <div className="result-photo-frame">
+                <img src={editedUrl ?? previewUrl} alt="" />
+                {!editedUrl && (
+                  <div className={`result-photo-frame__overlay ${generating ? 'is-pulsing' : ''}`}>
+                    <Icon name="sparkle" size={40} />
+                  </div>
+                )}
+              </div>
+            }
+          />
+
+          {canGenerate && isPro && (
+            <div className="result-generate">
+              {genError && <p className="result-generate__error">{r.afterErrorNote}</p>}
+              <Button variant="outline" onClick={handleGenerate} disabled={generating}>
+                <Icon name="sparkle" size={16} />
+                {generating ? r.afterGenerating : editedUrl ? r.afterRegenerateCta : r.afterGenerateCta}
+              </Button>
             </div>
-          }
-        />
-        <p className="result-beforeafter__note">{r.afterMockNote}</p>
-      </section>
+          )}
+
+          {canGenerate && !isPro && (
+            <div className="result-generate">
+              <p className="result-beforeafter__note">{r.afterProNote}</p>
+              <Link to="/pricing">
+                <Button variant="outline">{r.afterProCta}</Button>
+              </Link>
+            </div>
+          )}
+
+          {!canGenerate && <p className="result-beforeafter__note">{r.afterMockNote}</p>}
+        </section>
+      )}
 
       <div className="evaluate-step__actions">
         <Button variant="outline" onClick={onReset}>
           <Icon name="swap" size={16} />
-          {r.resetButton}
+          {backLabel ?? r.resetButton}
         </Button>
       </div>
     </div>

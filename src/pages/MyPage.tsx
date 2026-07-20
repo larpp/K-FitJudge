@@ -160,7 +160,7 @@ export default function MyPage() {
               const tpo = tpoOptions.find((o) => o.key === entry.tpo);
               if (!tpo) return null;
               return (
-                <div className="card history-card" key={entry.id}>
+                <Link className="card history-card" to={`/mypage/history/${entry.id}`} key={entry.id}>
                   <div className="history-card__icon">
                     <Icon name={tpo.icon} size={18} />
                   </div>
@@ -176,7 +176,8 @@ export default function MyPage() {
                     {entry.overall_score}
                     <span>/100</span>
                   </div>
-                </div>
+                  <Icon name="chevronRight" size={16} className="history-card__chevron" />
+                </Link>
               );
             })}
           </div>

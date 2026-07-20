@@ -1,0 +1,27 @@
+.history-detail {
+  padding: 48px 0 80px;
+}
+.history-detail-loading {
+  min-height: 320px;
+}
+.history-detail-notfound {
+  max-width: 380px;
+  margin: 80px auto;
+  text-align: center;
+  padding: 40px 32px;
+}
+.history-detail-notfound__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+}
+.history-detail-notfound p {
+  color: var(--text-muted);
+  margin: 8px 0 22px;
+}
