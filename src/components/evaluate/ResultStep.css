@@ -148,3 +148,16 @@
   justify-content: center;
   color: #fff;
 }
+
+.result-generate {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.result-generate__error {
+  font-size: 13px;
+  color: var(--danger);
+}

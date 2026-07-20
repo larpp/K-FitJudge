@@ -20,6 +20,7 @@ interface EvaluationRow {
   strengths: StrengthEntry[];
   improvements: FeedbackEntry[];
   photo_path: string | null;
+  edited_photo_path: string | null;
   created_at: string;
 }
 
@@ -32,6 +33,7 @@ export default function HistoryDetailPage() {
 
   const [row, setRow] = useState<EvaluationRow | null | undefined>(undefined);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [editedPhotoUrl, setEditedPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user || !id) return;
@@ -40,7 +42,9 @@ export default function HistoryDetailPage() {
     (async () => {
       const { data } = await supabase
         .from('evaluations')
-        .select('id, tpo, intent, overall_score, categories, strengths, improvements, photo_path, created_at')
+        .select(
+          'id, tpo, intent, overall_score, categories, strengths, improvements, photo_path, edited_photo_path, created_at',
+        )
         .eq('id', id)
         .maybeSingle();
 
@@ -52,6 +56,12 @@ export default function HistoryDetailPage() {
           .from('evaluation-photos')
           .createSignedUrl(data.photo_path, 3600);
         if (!cancelled && signed) setPhotoUrl(signed.signedUrl);
+      }
+      if (data?.edited_photo_path) {
+        const { data: signedEdited } = await supabase.storage
+          .from('evaluation-photos')
+          .createSignedUrl(data.edited_photo_path, 3600);
+        if (!cancelled && signedEdited) setEditedPhotoUrl(signedEdited.signedUrl);
       }
     })();
 
@@ -114,6 +124,8 @@ export default function HistoryDetailPage() {
         previewUrl={photoUrl}
         dateLabel={new Date(row.created_at).toLocaleDateString(locale === 'ko' ? 'ko-KR' : 'en-US')}
         backLabel={m.historyDetailBack}
+        evaluationId={row.id}
+        initialEditedUrl={editedPhotoUrl}
         onReset={() => navigate('/mypage')}
       />
     </div>
