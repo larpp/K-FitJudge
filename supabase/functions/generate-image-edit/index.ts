@@ -4,8 +4,14 @@ import { requireUser } from '../_shared/authUser.ts';
 import { editImageWithFal } from '../_shared/fal.ts';
 
 interface ImprovementRow {
+  key?: string;
   textEn?: string;
 }
+
+// 헤어스타일/퍼스널컬러 피드백까지 이미지 편집 지시에 넣으면 모델이 머리·얼굴 쪽을
+// 건드려도 되는 걸로 오해하기 쉽다. 옷/신발/액세서리처럼 실제로 "입고 있는 것"에
+// 해당하는 카테고리의 피드백만 이미지 생성 프롬프트에 반영한다.
+const GARMENT_CATEGORY_KEYS = new Set(['color', 'topBottom', 'fit', 'shoes', 'accessory', 'tpoFit']);
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -39,20 +45,27 @@ Deno.serve(async (req) => {
 
   const improvements: ImprovementRow[] = Array.isArray(evaluation.improvements) ? evaluation.improvements : [];
   const instructions = improvements
+    .filter((f) => !f.key || GARMENT_CATEGORY_KEYS.has(f.key))
     .map((f) => f.textEn)
     .filter((text): text is string => Boolean(text))
     .slice(0, 3);
 
+  const preserveClause =
+    "This is a garment-only edit — imagine only the clothing layer is being swapped. The person's face, facial features, skin tone, hairstyle, head, body shape, and pose, and the entire background, must stay pixel-identical to the original photo. Do not change anything except the clothing described below.";
+
   const prompt =
     instructions.length > 0
-      ? `Photorealistic edit of this outfit photo. Only apply these specific style changes: ${instructions
+      ? `${preserveClause} Apply only these changes: ${instructions
           .map((t, i) => `${i + 1}) ${t}`)
-          .join(' ')} Keep the person's identity, face, pose, body, and background completely unchanged. Do not alter anything not mentioned above.`
-      : 'Subtly refine this outfit for better color harmony and fit, while keeping the person\'s identity, face, pose, body, and background completely unchanged.';
+          .join(' ')} Nothing else should change.`
+      : `${preserveClause} Subtly refine the outfit's color harmony and fit only.`;
+
+  const negativePrompt =
+    'different face, changed facial features, different person, changed hairstyle, changed head, changed background, changed pose, changed body shape, extra limbs, blurry, distorted, watermark, text';
 
   let falImageUrl: string;
   try {
-    falImageUrl = await editImageWithFal({ prompt, imageUrl: signed.signedUrl });
+    falImageUrl = await editImageWithFal({ prompt, imageUrl: signed.signedUrl, negativePrompt });
   } catch (err) {
     const code = err instanceof Error ? err.message : 'AI_PROVIDER_ERROR';
     return jsonResponse({ error: code }, 502);

@@ -192,6 +192,9 @@ const en: typeof ko = {
     historyDetailBack: 'Back to My Page',
     historyNotFoundTitle: 'Evaluation not found',
     historyNotFoundDesc: "This record was deleted or doesn't exist.",
+    historyDeleteCta: 'Delete this record',
+    historyDeleteConfirm: "Delete this evaluation? It'll disappear from your history and can't be undone.",
+    historyDeleteError: "Couldn't delete this record. Please try again in a moment.",
   },
   pricing: {
     title: 'Pricing',

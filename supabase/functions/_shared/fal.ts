@@ -23,7 +23,11 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function editImageWithFal(opts: { prompt: string; imageUrl: string }): Promise<string> {
+export async function editImageWithFal(opts: {
+  prompt: string;
+  imageUrl: string;
+  negativePrompt?: string;
+}): Promise<string> {
   const falKey = Deno.env.get('FAL_KEY');
   if (!falKey) throw new Error('FAL_KEY_MISSING');
 
@@ -35,7 +39,14 @@ export async function editImageWithFal(opts: { prompt: string; imageUrl: string 
   const submitRes = await fetch(FAL_SUBMIT_URL, {
     method: 'POST',
     headers,
-    body: JSON.stringify({ prompt: opts.prompt, image_urls: [opts.imageUrl] }),
+    body: JSON.stringify({
+      prompt: opts.prompt,
+      image_urls: [opts.imageUrl],
+      negative_prompt: opts.negativePrompt ?? '',
+      // 기본값(4)은 지시를 느슨하게 따라서 얼굴/배경까지 다시 그리는 경우가 많았다.
+      // 값을 높여 프롬프트(=원본 보존 지시)를 더 엄격하게 따르게 한다.
+      guidance_scale: 7.5,
+    }),
   });
   if (!submitRes.ok) {
     const detail = await submitRes.text().catch(() => '');
