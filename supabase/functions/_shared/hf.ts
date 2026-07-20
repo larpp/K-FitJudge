@@ -12,6 +12,12 @@ export async function callHfVisionChat(opts: {
   const hfToken = Deno.env.get('HF_TOKEN');
   if (!hfToken) throw new Error('HF_TOKEN_MISSING');
 
+  // 이미지 base64는 로그에 남기지 않고(용량이 크고 무의미), 모델/프롬프트만 남긴다.
+  console.log(
+    'HF request',
+    JSON.stringify({ model: opts.model, systemPrompt: opts.systemPrompt, userText: opts.userText }),
+  );
+
   const res = await fetch(HF_ROUTER_URL, {
     method: 'POST',
     headers: {
@@ -47,5 +53,6 @@ export async function callHfVisionChat(opts: {
     console.error('HF router empty content', JSON.stringify(data).slice(0, 500));
     throw new Error('AI_PROVIDER_ERROR');
   }
+  console.log('HF response', content);
   return content;
 }
