@@ -7,6 +7,8 @@ import AnalyzingStep from '../components/evaluate/AnalyzingStep';
 import ResultStep from '../components/evaluate/ResultStep';
 import LimitReachedStep from '../components/evaluate/LimitReachedStep';
 import { useI18n } from '../i18n/I18nProvider';
+import { useAuth } from '../auth/AuthProvider';
+import { supabase } from '../lib/supabaseClient';
 import { tpoOptions, type TpoOption } from '../data/tpoOptions';
 import { samplePhotoDataUrl } from '../data/samplePhoto';
 import { generateMockResult, type MockResult } from '../data/mockScoring';
@@ -19,9 +21,11 @@ const STEP_ORDER: Step[] = ['upload', 'tpo', 'intent', 'analyzing'];
 
 export default function EvaluatePage() {
   const { t, locale } = useI18n();
+  const { user } = useAuth();
   const [step, setStep] = useState<Step>('upload');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isSample, setIsSample] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [tpo, setTpo] = useState<TpoOption['key'] | null>(null);
   const [intent, setIntent] = useState<StyleIntent | null>(null);
   const [result, setResult] = useState<MockResult | null>(null);
@@ -35,7 +39,7 @@ export default function EvaluatePage() {
     };
   }, []);
 
-  const setPhotoUrl = (url: string | null, sample: boolean) => {
+  const setPhotoUrl = (url: string | null, sample: boolean, file: File | null = null) => {
     if (objectUrlRef.current) {
       URL.revokeObjectURL(objectUrlRef.current);
       objectUrlRef.current = null;
@@ -43,9 +47,10 @@ export default function EvaluatePage() {
     if (url && !sample) objectUrlRef.current = url;
     setPreviewUrl(url);
     setIsSample(sample);
+    setPhotoFile(file);
   };
 
-  const handleFileSelect = (file: File) => setPhotoUrl(URL.createObjectURL(file), false);
+  const handleFileSelect = (file: File) => setPhotoUrl(URL.createObjectURL(file), false, file);
   const handleUseSample = () => setPhotoUrl(samplePhotoDataUrl, true);
   const handleClearPhoto = () => setPhotoUrl(null, false);
 
@@ -69,14 +74,28 @@ export default function EvaluatePage() {
     if (!selectedTpoOption || !intent) return;
     const freshResult = generateMockResult(selectedTpoOption, intent, locale, Date.now());
     setResult(freshResult);
-    const persistPromise = invokeFunction('record-evaluation', {
-      tpo: selectedTpoOption.key,
-      intent,
-      overall: freshResult.overall,
-      categories: freshResult.categories,
-      strengths: freshResult.strengths,
-      improvements: freshResult.improvements,
-    });
+
+    const persistPromise = (async () => {
+      let photoPath: string | undefined;
+      // 샘플 사진은 실제 사진이 아니므로 저장하지 않는다.
+      if (user && photoFile && !isSample) {
+        const ext = photoFile.name.split('.').pop() || 'jpg';
+        const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from('evaluation-photos')
+          .upload(path, photoFile);
+        if (!uploadError) photoPath = path;
+      }
+      return invokeFunction('record-evaluation', {
+        tpo: selectedTpoOption.key,
+        intent,
+        overall: freshResult.overall,
+        categories: freshResult.categories,
+        strengths: freshResult.strengths,
+        improvements: freshResult.improvements,
+        photoPath,
+      });
+    })();
     // handleViewResult awaits this later (once the analyzing animation finishes), which can be
     // several seconds after the request actually settles. Attach a no-op catch immediately so the
     // browser doesn't flag it as an unhandled rejection in the meantime; the real handling still

@@ -180,6 +180,9 @@ const ko = {
     historyEmptyTitle: '아직 평가 기록이 없어요',
     historyEmptyDesc: '첫 평가를 받아보면 여기에 기록이 쌓여요.',
     historyEmptyCta: '지금 평가받기',
+    historyDetailBack: '마이페이지로 돌아가기',
+    historyNotFoundTitle: '평가 기록을 찾을 수 없어요',
+    historyNotFoundDesc: '삭제되었거나 존재하지 않는 기록이에요.',
   },
   pricing: {
     title: '요금제',

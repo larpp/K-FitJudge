@@ -182,6 +182,9 @@ const en: typeof ko = {
     historyEmptyTitle: 'No evaluations yet',
     historyEmptyDesc: 'Get your first evaluation and it will show up here.',
     historyEmptyCta: 'Get Evaluated Now',
+    historyDetailBack: 'Back to My Page',
+    historyNotFoundTitle: 'Evaluation not found',
+    historyNotFoundDesc: "This record was deleted or doesn't exist.",
   },
   pricing: {
     title: 'Pricing',

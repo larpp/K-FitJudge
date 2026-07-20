@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   if (!user) return jsonResponse({ error: 'Unauthorized' }, 401);
 
   const body = await req.json();
-  const { tpo, intent, overall, categories, strengths, improvements } = body ?? {};
+  const { tpo, intent, overall, categories, strengths, improvements, photoPath } = body ?? {};
   if (
     typeof tpo !== 'string' ||
     (intent !== 'classic' && intent !== 'experimental') ||
@@ -22,6 +22,10 @@ Deno.serve(async (req) => {
   ) {
     return jsonResponse({ error: 'Invalid evaluation payload.' }, 400);
   }
+
+  // 업로드된 사진 경로가 본인 폴더("{uid}/...") 소속일 때만 인정한다.
+  const safePhotoPath =
+    typeof photoPath === 'string' && photoPath.startsWith(`${user.id}/`) ? photoPath : null;
 
   const { data: profile } = await supabaseAdmin.from('profiles').select('plan').eq('id', user.id).maybeSingle();
   const plan = profile?.plan === 'pro' ? 'pro' : 'free';
@@ -55,6 +59,7 @@ Deno.serve(async (req) => {
       categories,
       strengths,
       improvements,
+      photo_path: safePhotoPath,
     })
     .select('id')
     .single();

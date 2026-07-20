@@ -12,11 +12,21 @@ interface ResultStepProps {
   result: MockResult;
   tpo: TpoOption;
   intent: StyleIntent;
-  previewUrl: string;
+  previewUrl?: string | null;
+  dateLabel?: string;
+  backLabel?: string;
   onReset: () => void;
 }
 
-export default function ResultStep({ result, tpo, intent, previewUrl, onReset }: ResultStepProps) {
+export default function ResultStep({
+  result,
+  tpo,
+  intent,
+  previewUrl,
+  dateLabel,
+  backLabel,
+  onReset,
+}: ResultStepProps) {
   const { t, locale } = useI18n();
   const r = t.evaluate.result;
 
@@ -30,6 +40,7 @@ export default function ResultStep({ result, tpo, intent, previewUrl, onReset }:
     <div className="result-step">
       <div className="result-header">
         <span className="badge badge-accent">{r.eyebrow}</span>
+        {dateLabel && <p className="result-date">{dateLabel}</p>}
         <div className="result-score">
           <strong>{result.overall}</strong>
           <span>{r.scoreSuffix}</span>
@@ -104,33 +115,35 @@ export default function ResultStep({ result, tpo, intent, previewUrl, onReset }:
         </div>
       </section>
 
-      <section className="result-section">
-        <h2>{r.beforeAfterTitle}</h2>
-        <BeforeAfterSlider
-          beforeLabel={t.home.beforeLabel}
-          afterLabel={r.afterMockLabel}
-          hint={t.home.sliderHint}
-          beforeSlot={
-            <div className="result-photo-frame">
-              <img src={previewUrl} alt="" />
-            </div>
-          }
-          afterSlot={
-            <div className="result-photo-frame">
-              <img src={previewUrl} alt="" />
-              <div className="result-photo-frame__overlay">
-                <Icon name="sparkle" size={40} />
+      {previewUrl && (
+        <section className="result-section">
+          <h2>{r.beforeAfterTitle}</h2>
+          <BeforeAfterSlider
+            beforeLabel={t.home.beforeLabel}
+            afterLabel={r.afterMockLabel}
+            hint={t.home.sliderHint}
+            beforeSlot={
+              <div className="result-photo-frame">
+                <img src={previewUrl} alt="" />
               </div>
-            </div>
-          }
-        />
-        <p className="result-beforeafter__note">{r.afterMockNote}</p>
-      </section>
+            }
+            afterSlot={
+              <div className="result-photo-frame">
+                <img src={previewUrl} alt="" />
+                <div className="result-photo-frame__overlay">
+                  <Icon name="sparkle" size={40} />
+                </div>
+              </div>
+            }
+          />
+          <p className="result-beforeafter__note">{r.afterMockNote}</p>
+        </section>
+      )}
 
       <div className="evaluate-step__actions">
         <Button variant="outline" onClick={onReset}>
           <Icon name="swap" size={16} />
-          {r.resetButton}
+          {backLabel ?? r.resetButton}
         </Button>
       </div>
     </div>

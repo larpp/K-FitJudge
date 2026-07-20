@@ -21,7 +21,8 @@
 ### PART 3 이후 진행 상황
 
 - [x] PART 3 — `evaluations` 테이블에 평가 결과 저장, 마이페이지 히스토리 실데이터화, 무료 플랜 월 3회 한도를 서버(Edge Function)에서 강제
-- [ ] PART 3.5 — AI 실연동(비전 피드백 + Pro 이미지 편집). 사용할 AI 모델/비용 구조는 시작 시점에 결정 예정
+- [x] 히스토리 상세 보기 — 마이페이지에서 과거 평가 클릭 시 당시 결과 화면(점수·피드백·사진)을 그대로 다시 볼 수 있음. 플랜이 바뀌어도 과거 기록은 항상 열람 가능
+- [ ] PART 3.5 — AI 실연동(비전 피드백 + Pro 이미지 편집). 비전 모델은 Hugging Face 오픈소스(무료: 소형 모델 / Pro: 대형 모델), 이미지 편집은 FLUX.1 Kontext로 진행 예정
 - [ ] PART 4 — 정기결제 전환 + 구독 취소 기능
 - [ ] PART 5 — 보안 점검, 이용약관/개인정보처리방침, 성능 최적화
 - [ ] PART 6 — 최종 배포 (맨 마지막)
@@ -48,6 +49,7 @@ Supabase 대시보드 → SQL Editor에서 순서대로 실행하세요.
 1. `supabase/schema.sql` — `profiles` 테이블, RLS 정책, 회원가입 시 프로필 자동 생성 트리거
 2. `supabase/schema_payments.sql` — `orders` 테이블, `profiles.plan` 컬럼 (결제 완료 시 'pro'로 전환)
 3. `supabase/schema_evaluations.sql` — `evaluations` 테이블(RLS: 본인 조회만, 쓰기는 서버 전용)
+4. `supabase/schema_evaluation_photos.sql` — `evaluations.photo_path` 컬럼 + 평가 사진용 비공개 Storage 버킷(`evaluation-photos`) 및 RLS(본인 사진만 업로드/조회)
 
 ## Supabase Edge Functions (서버 로직)
 
@@ -69,6 +71,6 @@ npx supabase secrets set PAYPAL_CLIENT_SECRET=your_paypal_client_secret
 npx supabase secrets set PAYPAL_API_BASE=https://api-m.sandbox.paypal.com
 ```
 
-`record-evaluation`은 로그인한 사용자의 이번 달 평가 횟수를 서버에서 직접 세어, 무료 플랜은 3회를 넘으면 `LIMIT_REACHED` 에러를 반환합니다(클라이언트에서 우회 불가).
+`record-evaluation`은 로그인한 사용자의 이번 달 평가 횟수를 서버에서 직접 세어, 무료 플랜은 3회를 넘으면 `LIMIT_REACHED` 에러를 반환합니다(클라이언트에서 우회 불가). 평가 사진 저장 기능을 추가하면서 코드가 바뀌었으니, `schema_evaluation_photos.sql` 실행 후 `record-evaluation`을 다시 배포(`npx supabase functions deploy record-evaluation`)해주세요.
 
 `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`는 Edge Functions 런타임이 자동으로 주입하므로 별도 설정이 필요 없습니다.

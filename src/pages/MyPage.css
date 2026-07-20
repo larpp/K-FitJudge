@@ -119,6 +119,15 @@
   align-items: center;
   gap: 14px;
   padding: 14px 16px;
+  transition: .15s;
+}
+.history-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-card);
+}
+.history-card__chevron {
+  color: var(--text-muted);
+  flex-shrink: 0;
 }
 .history-card__icon {
   width: 40px;
