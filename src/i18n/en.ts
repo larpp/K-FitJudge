@@ -121,6 +121,13 @@ const en: typeof ko = {
       viewResultButton: 'View Results',
       resetButton: 'Start Over',
     },
+    limit: {
+      title: "You've used your free evaluations for this month",
+      desc: 'The Free plan includes 3 evaluations a month. Upgrade to Pro for unlimited evaluations.',
+      upgradeCta: 'See Pro Plan',
+      resetCta: 'Back to Start',
+      genericErrorTitle: "Couldn't save your evaluation",
+    },
     result: {
       eyebrow: 'Evaluation Complete',
       scoreSuffix: '/ 100',
@@ -178,8 +185,7 @@ const en: typeof ko = {
   },
   pricing: {
     title: 'Pricing',
-    subtitle: 'Every feature is free to try for now. Payment integration connects in PART 2.',
-    badge: 'Coming soon · before payment integration',
+    subtitle: 'Start free, upgrade to Pro whenever you need more.',
     plans: [
       {
         name: 'Free',
@@ -192,6 +198,7 @@ const en: typeof ko = {
       {
         name: 'Pro',
         price: '$7.90',
+        priceUsd: '$7.90',
         period: 'month',
         features: [
           'Unlimited AI evaluations',
@@ -199,11 +206,29 @@ const en: typeof ko = {
           'Saved evaluation history',
           'Watermark-free sharing',
         ],
-        cta: 'Coming Soon',
+        cta: 'Subscribe',
         highlighted: true,
       },
     ],
-    note: 'Payment (Toss Payments/Stripe) and webhook verification connect in the PART 2 backend guide.',
+    note: "This is test-mode payment — wired up with test keys, so no real card is charged.",
+    methodLabel: 'Payment method',
+    methodToss: 'Toss Payments (KRW)',
+    methodPaypal: 'PayPal (USD)',
+    loginRequired: 'Please log in first to subscribe',
+    loginCta: 'Go to Log In',
+    proActiveBadge: 'Pro Active',
+    processing: 'Opening checkout...',
+  },
+  payment: {
+    tossCheckingTitle: 'Confirming your payment...',
+    tossSuccessTitle: 'Payment complete!',
+    tossSuccessDesc: "Pro plan is now active. You have unlimited access to every feature.",
+    tossFailTitle: 'Payment cancelled',
+    tossFailDescFallback: 'The payment was not completed. Please try again.',
+    backToPricing: 'Back to Pricing',
+    goToMypage: 'Go to My Page',
+    paypalSuccessTitle: 'Payment complete!',
+    paypalErrorFallback: 'Something went wrong with the PayPal payment.',
   },
 };
 

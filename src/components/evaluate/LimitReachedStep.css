@@ -1,0 +1,16 @@
+.limit-step {
+  max-width: 420px;
+  margin: 0 auto;
+  text-align: center;
+}
+.limit-step__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--yellow-soft);
+  color: #8a6100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+}

@@ -1,0 +1,46 @@
+.toss-return {
+  max-width: 420px;
+  margin: 80px auto;
+  text-align: center;
+  padding: 40px 32px;
+}
+.toss-return__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+}
+.toss-return__icon.is-pending {
+  background: var(--primary-soft);
+  color: var(--primary);
+  animation: kfj-toss-pulse 1.6s ease-in-out infinite;
+}
+.toss-return__icon.is-success {
+  background: var(--green-soft);
+  color: var(--green);
+}
+.toss-return__icon.is-fail {
+  background: #fdecef;
+  color: var(--danger);
+}
+.toss-return p {
+  color: var(--text-muted);
+  margin: 10px 0 24px;
+  line-height: 1.6;
+}
+.toss-return__actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+@keyframes kfj-toss-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .55; transform: scale(1.1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toss-return__icon.is-pending { animation: none; }
+}

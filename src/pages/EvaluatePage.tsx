@@ -1,17 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import StepProgress from '../components/evaluate/StepProgress';
 import UploadStep from '../components/evaluate/UploadStep';
 import TpoStep from '../components/evaluate/TpoStep';
 import IntentStep, { type StyleIntent } from '../components/evaluate/IntentStep';
 import AnalyzingStep from '../components/evaluate/AnalyzingStep';
 import ResultStep from '../components/evaluate/ResultStep';
+import LimitReachedStep from '../components/evaluate/LimitReachedStep';
 import { useI18n } from '../i18n/I18nProvider';
 import { tpoOptions, type TpoOption } from '../data/tpoOptions';
 import { samplePhotoDataUrl } from '../data/samplePhoto';
-import { generateMockResult } from '../data/mockScoring';
+import { generateMockResult, type MockResult } from '../data/mockScoring';
+import { invokeFunction } from '../lib/payments/invokeFunction';
 import './EvaluatePage.css';
 
-type Step = 'upload' | 'tpo' | 'intent' | 'analyzing' | 'result';
+type Step = 'upload' | 'tpo' | 'intent' | 'analyzing' | 'result' | 'limit';
 
 const STEP_ORDER: Step[] = ['upload', 'tpo', 'intent', 'analyzing'];
 
@@ -22,8 +24,10 @@ export default function EvaluatePage() {
   const [isSample, setIsSample] = useState(false);
   const [tpo, setTpo] = useState<TpoOption['key'] | null>(null);
   const [intent, setIntent] = useState<StyleIntent | null>(null);
-  const [runId, setRunId] = useState(0);
+  const [result, setResult] = useState<MockResult | null>(null);
+  const [limitError, setLimitError] = useState<{ isQuota: boolean; detail?: string } | null>(null);
   const objectUrlRef = useRef<string | null>(null);
+  const persistPromiseRef = useRef<Promise<unknown> | null>(null);
 
   useEffect(() => {
     return () => {
@@ -49,6 +53,8 @@ export default function EvaluatePage() {
     setPhotoUrl(null, false);
     setTpo(null);
     setIntent(null);
+    setResult(null);
+    setLimitError(null);
     setStep('upload');
   };
 
@@ -59,14 +65,41 @@ export default function EvaluatePage() {
       : selectedTpoOption.labelEn
     : '';
 
-  const mockResult = useMemo(() => {
-    if (!selectedTpoOption || !intent) return null;
-    return generateMockResult(selectedTpoOption, intent, locale, runId);
-  }, [selectedTpoOption, intent, locale, runId]);
+  const handleStartAnalyzing = () => {
+    if (!selectedTpoOption || !intent) return;
+    const freshResult = generateMockResult(selectedTpoOption, intent, locale, Date.now());
+    setResult(freshResult);
+    const persistPromise = invokeFunction('record-evaluation', {
+      tpo: selectedTpoOption.key,
+      intent,
+      overall: freshResult.overall,
+      categories: freshResult.categories,
+      strengths: freshResult.strengths,
+      improvements: freshResult.improvements,
+    });
+    // handleViewResult awaits this later (once the analyzing animation finishes), which can be
+    // several seconds after the request actually settles. Attach a no-op catch immediately so the
+    // browser doesn't flag it as an unhandled rejection in the meantime; the real handling still
+    // happens below when we await persistPromiseRef.current.
+    persistPromise.catch(() => {});
+    persistPromiseRef.current = persistPromise;
+    setStep('analyzing');
+  };
+
+  const handleViewResult = async () => {
+    try {
+      await persistPromiseRef.current;
+      setStep('result');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setLimitError({ isQuota: message === 'LIMIT_REACHED', detail: message });
+      setStep('limit');
+    }
+  };
 
   return (
     <div className="container evaluate-page">
-      {step !== 'result' && (
+      {step !== 'result' && step !== 'limit' && (
         <StepProgress labels={t.evaluate.stepLabels} currentIndex={STEP_ORDER.indexOf(step)} />
       )}
 
@@ -95,24 +128,25 @@ export default function EvaluatePage() {
           selected={intent}
           onSelect={setIntent}
           onBack={() => setStep('tpo')}
-          onNext={() => {
-            setRunId((id) => id + 1);
-            setStep('analyzing');
-          }}
+          onNext={handleStartAnalyzing}
         />
       )}
 
       {step === 'analyzing' && (
-        <AnalyzingStep
-          tpoLabel={selectedTpoLabel}
+        <AnalyzingStep tpoLabel={selectedTpoLabel} onReset={handleReset} onViewResult={handleViewResult} />
+      )}
+
+      {step === 'limit' && (
+        <LimitReachedStep
+          isQuotaError={limitError?.isQuota ?? false}
+          errorDetail={limitError?.detail}
           onReset={handleReset}
-          onViewResult={() => setStep('result')}
         />
       )}
 
-      {step === 'result' && mockResult && selectedTpoOption && intent && previewUrl && (
+      {step === 'result' && result && selectedTpoOption && intent && previewUrl && (
         <ResultStep
-          result={mockResult}
+          result={result}
           tpo={selectedTpoOption}
           intent={intent}
           previewUrl={previewUrl}
