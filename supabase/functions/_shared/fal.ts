@@ -36,17 +36,21 @@ export async function editImageWithFal(opts: {
     'Content-Type': 'application/json',
   };
 
+  const requestBody = {
+    prompt: opts.prompt,
+    image_urls: [opts.imageUrl],
+    negative_prompt: opts.negativePrompt ?? '',
+    // 기본값(4)은 지시를 느슨하게 따라서 얼굴/배경까지 다시 그리는 경우가 많았다.
+    // 값을 높여 프롬프트(=원본 보존 지시)를 더 엄격하게 따르게 한다.
+    guidance_scale: 9,
+  };
+  // 실제로 fal에 어떤 프롬프트가 나갔는지 Supabase 함수 로그에서 바로 확인할 수 있게 남긴다.
+  console.log('fal request', JSON.stringify(requestBody));
+
   const submitRes = await fetch(FAL_SUBMIT_URL, {
     method: 'POST',
     headers,
-    body: JSON.stringify({
-      prompt: opts.prompt,
-      image_urls: [opts.imageUrl],
-      negative_prompt: opts.negativePrompt ?? '',
-      // 기본값(4)은 지시를 느슨하게 따라서 얼굴/배경까지 다시 그리는 경우가 많았다.
-      // 값을 높여 프롬프트(=원본 보존 지시)를 더 엄격하게 따르게 한다.
-      guidance_scale: 7.5,
-    }),
+    body: JSON.stringify(requestBody),
   });
   if (!submitRes.ok) {
     const detail = await submitRes.text().catch(() => '');
@@ -73,6 +77,7 @@ export async function editImageWithFal(opts: {
         console.error('fal result missing image url', JSON.stringify(result).slice(0, 500));
         throw new Error('AI_PROVIDER_ERROR');
       }
+      console.log('fal result', JSON.stringify(result));
       return url;
     }
   }
