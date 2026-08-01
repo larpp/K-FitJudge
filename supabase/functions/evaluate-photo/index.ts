@@ -16,26 +16,61 @@ interface AiCategory {
   score: number;
   noteKo: string;
   noteEn: string;
+  editEn: string | null;
 }
 
+// 이미지 편집 지시를 만들 수 있는(= 실제로 "입고 있는 것"에 해당하는) 카테고리.
+// 헤어/퍼스널컬러는 옷이 아니라 사람 자체라서 편집 지시를 만들지 않는다.
+const GARMENT_CATEGORY_KEYS = new Set(['color', 'topBottom', 'fit', 'shoes', 'accessory', 'tpoFit']);
+
 function buildSystemPrompt(tpoKo: string, tpoEn: string, intent: string): string {
-  const rubric = CATEGORY_DEFS.map((c) => `- ${c.key} (max ${c.max}): ${c.labelKo} / ${c.labelEn}`).join('\n');
+  const rubric = CATEGORY_DEFS.map(
+    (c) =>
+      `- ${c.key} (0-${c.max}): ${c.labelEn} (${c.labelKo})${
+        GARMENT_CATEGORY_KEYS.has(c.key) ? '' : ' — grooming, not clothing: always set editEn to null'
+      }`,
+  ).join('\n');
+
   const intentNote =
     intent === 'experimental'
-      ? '이 사용자는 "실험적(아방가르드)" 의도를 선언했다. 과감한 오버사이즈나 믹스매치를 감점 요인이 아니라 창의성으로 존중해서 관대하게 채점하라.'
-      : '이 사용자는 "클래식" 의도를 선언했다. 기본기(색상 조화, 핏, TPO 적합도)를 기준으로 꼼꼼하게 채점하라.';
+      ? 'The wearer has declared an EXPERIMENTAL (avant-garde) intent. Deliberate oversizing, clashing prints, and unconventional proportions are creative choices, not mistakes — judge whether the risk pays off, and only mark down what genuinely reads as accidental or unresolved.'
+      : 'The wearer has declared a CLASSIC intent. Judge against the fundamentals — color harmony, proportion, fit, and appropriateness for the occasion — and hold a high standard.';
 
-  return `You are a professional fashion stylist judging an outfit photo for the K-FitJudge app.
-The occasion (TPO) is "${tpoKo}" (${tpoEn}).
+  return `You are a senior fashion stylist and image consultant with 15 years of editorial and personal-styling experience. You are judging one outfit photo for the K-FitJudge app.
+
+The occasion (TPO) is "${tpoEn}" (${tpoKo}).
 ${intentNote}
 
-Score the outfit in the photo against exactly these 8 categories. Each category's score must be an integer between 0 and its max:
+STEP 1 — OBSERVE. Before scoring, identify what the person is actually wearing. Name each garment with its concrete color, material, and silhouette (e.g. "cream oversized cotton oxford shirt", "washed indigo straight-leg denim", "white leather low-top sneakers"). If a slot is empty or not visible in the photo, write "none". Never invent a garment you cannot see.
+
+STEP 2 — SCORE these 8 categories. Each score is an integer from 0 to its max:
 ${rubric}
 
-For each category, also write one short, concrete, natural-sounding note (1 sentence) explaining the score — both in Korean (noteKo) and English (noteEn). If the score is high, the note should read as a compliment; if low, it should read as a specific, actionable suggestion.
+Scoring calibration — use the full range, do not cluster everything near the top:
+- 90-100% of max: genuinely excellent; a stylist would photograph this as-is.
+- 75-89%: solid and well-executed, with one refinement available.
+- 55-74%: works but has a clear, nameable weakness.
+- 30-54%: actively undermines the look.
+- Below 30%: wrong for the occasion or visually broken.
+Judge each category independently. A great outfit can still have weak shoes; do not let one strong category inflate the others.
 
-Respond with ONLY a single JSON object, no markdown fences, no extra text, in exactly this shape:
-{"categories":{"color":{"score":0,"noteKo":"...","noteEn":"..."},"topBottom":{"score":0,"noteKo":"...","noteEn":"..."},"fit":{"score":0,"noteKo":"...","noteEn":"..."},"shoes":{"score":0,"noteKo":"...","noteEn":"..."},"accessory":{"score":0,"noteKo":"...","noteEn":"..."},"tpoFit":{"score":0,"noteKo":"...","noteEn":"..."},"personalColor":{"score":0,"noteKo":"...","noteEn":"..."},"hair":{"score":0,"noteKo":"...","noteEn":"..."}}}`;
+STEP 3 — WRITE FEEDBACK. For every category, write one note in Korean (noteKo) and the same note in English (noteEn). Each note must contain all three of these, in this order, as one flowing sentence or two short ones:
+  (a) the specific thing you observed, named concretely — not "the colors are off" but "the bright white sneakers";
+  (b) why it works or does not work FOR THIS OCCASION and this outfit's overall tone;
+  (c) if the score is below 90% of max, exactly what to change instead — name the replacement color, material, length, or styling move.
+Write like a stylist talking to a client: warm, direct, specific. Never vague ("looks good", "could be better"), never a bare diagnosis without a remedy, never a generic rule with no reference to this photo. The Korean note must read as natural Korean, not a translation.
+
+STEP 4 — WRITE EDIT INSTRUCTIONS. For each of the six clothing categories, also produce "editEn": a single imperative instruction for a photo-editing AI that will apply your advice to the actual photograph.
+Rules for editEn — these matter more than anything else in this task:
+- State the DIRECTION of the change explicitly and unambiguously. The editor cannot infer intent from a complaint. "The sneakers are too bright" is FORBIDDEN — it may make them brighter. Write "Replace the bright white sneakers with dark brown leather derby shoes" instead.
+- Always name the CURRENT item and the TARGET item: "Replace X with Y", "Change the X from A to B", "Remove the X".
+- Be concrete about the target: exact color ("charcoal grey", "camel"), material ("wool", "suede"), and silhouette where relevant. Never "a better color" or "something more suitable".
+- Describe only clothing, footwear, and accessories. Never mention the face, hair, skin, body, pose, or background — those must not change.
+- If this category needs no change (score is 90% or more of max), set editEn to null.
+- editEn must be consistent with noteEn: the same change, phrased as a command.
+
+Respond with ONLY a single JSON object, no markdown fences, no commentary before or after, in exactly this shape:
+{"observed":{"top":"...","bottom":"...","outerwear":"...","shoes":"...","accessories":"..."},"categories":{"color":{"score":0,"noteKo":"...","noteEn":"...","editEn":"..."},"topBottom":{"score":0,"noteKo":"...","noteEn":"...","editEn":"..."},"fit":{"score":0,"noteKo":"...","noteEn":"...","editEn":"..."},"shoes":{"score":0,"noteKo":"...","noteEn":"...","editEn":"..."},"accessory":{"score":0,"noteKo":"...","noteEn":"...","editEn":"..."},"tpoFit":{"score":0,"noteKo":"...","noteEn":"...","editEn":"..."},"personalColor":{"score":0,"noteKo":"...","noteEn":"...","editEn":null},"hair":{"score":0,"noteKo":"...","noteEn":"...","editEn":null}}}`;
 }
 
 function parseAiCategories(raw: string): Record<string, AiCategory> {
@@ -56,14 +91,22 @@ function parseAiCategories(raw: string): Record<string, AiCategory> {
   const result: Record<string, AiCategory> = {};
   for (const def of CATEGORY_DEFS) {
     const entry = (categories as Record<string, unknown>)[def.key] as
-      | { score?: unknown; noteKo?: unknown; noteEn?: unknown }
+      | { score?: unknown; noteKo?: unknown; noteEn?: unknown; editEn?: unknown }
       | undefined;
     const rawScore = Number(entry?.score);
     const score = Number.isFinite(rawScore) ? Math.min(def.max, Math.max(1, Math.round(rawScore))) : Math.round(def.max * 0.75);
+    // 옷 카테고리에 대해서만 편집 지시를 인정한다. 헤어/퍼스널컬러에 지시가 딸려와도
+    // 이미지 모델이 얼굴·머리를 건드리게 되므로 버린다.
+    const rawEdit = entry?.editEn;
+    const editEn =
+      GARMENT_CATEGORY_KEYS.has(def.key) && typeof rawEdit === 'string' && rawEdit.trim()
+        ? rawEdit.trim().slice(0, 300)
+        : null;
     result[def.key] = {
       score,
-      noteKo: typeof entry?.noteKo === 'string' ? entry.noteKo.slice(0, 200) : '',
-      noteEn: typeof entry?.noteEn === 'string' ? entry.noteEn.slice(0, 200) : '',
+      noteKo: typeof entry?.noteKo === 'string' ? entry.noteKo.slice(0, 300) : '',
+      noteEn: typeof entry?.noteEn === 'string' ? entry.noteEn.slice(0, 300) : '',
+      editEn,
     };
   }
   return result;
@@ -183,6 +226,10 @@ Deno.serve(async (req) => {
         key: r.c.key,
         textKo: r.note.noteKo,
         textEn: r.note.noteEn,
+        // 사용자에게 보여줄 문장(textEn)과 이미지 편집 모델에 넘길 명령문(editEn)은 역할이 다르다.
+        // "신발이 너무 밝다" 같은 진단문을 그대로 편집 지시로 쓰면 방향을 반대로 해석할 수 있어서,
+        // 모델에게 방향이 명시된 명령문을 따로 만들게 하고 그걸 저장한다.
+        editEn: r.note.editEn,
         pointsGain: Math.min(6, Math.max(2, r.c.max - r.c.score)),
       }));
     strengths = [...ranked]
