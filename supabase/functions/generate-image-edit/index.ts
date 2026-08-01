@@ -6,6 +6,7 @@ import { editImageWithFal } from '../_shared/fal.ts';
 interface ImprovementRow {
   key?: string;
   textEn?: string;
+  editEn?: string | null;
 }
 
 // 헤어스타일/퍼스널컬러 피드백까지 이미지 편집 지시에 넣으면 모델이 머리·얼굴 쪽을
@@ -46,22 +47,27 @@ Deno.serve(async (req) => {
   const improvements: ImprovementRow[] = Array.isArray(evaluation.improvements) ? evaluation.improvements : [];
   const instructions = improvements
     .filter((f) => !f.key || GARMENT_CATEGORY_KEYS.has(f.key))
-    .map((f) => f.textEn)
+    // editEn은 평가 모델이 만든 "방향이 명시된 명령문"이라 이미지 편집에 그대로 쓸 수 있다.
+    // editEn이 없는 예전 평가 기록은 사용자용 진단문(textEn)으로 대체한다.
+    .map((f) => f.editEn || f.textEn)
     .filter((text): text is string => Boolean(text))
     .slice(0, 3);
 
   const preserveClause =
-    "This is a garment-only edit — imagine only the clothing layer is being swapped. The person's face, facial features, skin tone, hairstyle, head, body shape, and pose, and the entire background, must stay pixel-identical to the original photo. Do not change anything except the clothing described below.";
+    "Photorealistic garment-only retouch of this exact photograph. Treat it as swapping the clothing layer on the same photo: the person's face, facial features, skin tone, hairstyle, head, body proportions, and pose, the camera angle and framing, the lighting direction, and the entire background must remain pixel-identical to the input. Preserve the original photo's grain, depth of field, and exposure so the result reads as the same shot, not a regenerated image.";
+
+  const directionClause =
+    'Each instruction states the target explicitly — apply it in exactly the stated direction, and do not substitute your own interpretation. Any garment not named in the instructions stays exactly as it is.';
 
   const prompt =
     instructions.length > 0
-      ? `${preserveClause} Apply only these changes: ${instructions
+      ? `${preserveClause} ${directionClause} Instructions: ${instructions
           .map((t, i) => `${i + 1}) ${t}`)
-          .join(' ')} Nothing else should change.`
-      : `${preserveClause} Subtly refine the outfit's color harmony and fit only.`;
+          .join(' ')} Make no other change of any kind.`
+      : `${preserveClause} Subtly refine the outfit's color harmony and fit only, changing nothing else.`;
 
   const negativePrompt =
-    'different face, changed facial features, different person, changed hairstyle, changed head, changed background, changed pose, changed body shape, extra limbs, blurry, distorted, watermark, text';
+    'different face, changed facial features, different person, changed hairstyle, changed head, changed skin tone, changed background, changed scene, changed pose, changed body shape, changed camera angle, changed lighting, extra limbs, deformed hands, blurry, distorted, oversaturated, cartoon, illustration, watermark, text';
 
   let falImageUrl: string;
   try {
